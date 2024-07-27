@@ -49,7 +49,11 @@ public class MapGenerator {
         throws ExecutionException, InterruptedException {
 
         if (nationalHighways == 0) {
-            doDFS(0, cities, lanes, cityList);
+            doDFS(0, cities, lanes, cityList, true);
+            System.out.println("roads");
+            roads.forEach(System.out::println);
+            System.out.println("leader");
+            leader.forEach(System.out::println);
             return;
         }
 
@@ -71,7 +75,7 @@ public class MapGenerator {
             int componentCities = citiesPerComponent + (i < extraCities ? 1 : 0);
             int componentLanes = lanesPerComponent + (i < extraLanes ? 1 : 0);
             List<City> componentCityList = cityList.subList(startIndex, startIndex + componentCities);
-            doDFS(i, componentCities, componentLanes, componentCityList);
+            doDFS(i, componentCities, componentLanes, componentCityList, false);
             startIndex += componentCities;
         }
 
@@ -87,12 +91,12 @@ public class MapGenerator {
         leader.forEach(System.out::println);
     }
 
-    public void doDFS(int city, int cities, int lanes, List<City> cityList)
+    public void doDFS(int city, int cities, int lanes, List<City> cityList, boolean alone)
         throws InterruptedException, ExecutionException {
         int attempt = 0;
         while (attempt < Integer.MAX_VALUE) {
             ExecutorService executor = Executors.newSingleThreadExecutor();
-            Future<?> future = executor.submit(() -> start(city, cities, lanes, cityList));
+            Future<?> future = executor.submit(() -> start(city, cities, lanes, cityList, alone));
 
             try {
                 future.get(1, TimeUnit.SECONDS);
@@ -109,7 +113,7 @@ public class MapGenerator {
     }
 
 
-    private void start(int city, int cities, int lanes, List<City> cityList) {
+    private void start(int city, int cities, int lanes, List<City> cityList, boolean alone) {
 
         boolean[][] linkEstablished = new boolean[cities][cities];
         int[][] roadWeights = new int[cities][cities];
@@ -118,14 +122,17 @@ public class MapGenerator {
         for(int i = 0; i < cities; i++) hasLink.add(new HashSet<>());
 
         visited[city] = true;
-        hasLink.get(city).add(4);
+        if(!alone) {
+            hasLink.get(city).add(4);
+        }
+
 
         dfs(city, 0, linkEstablished, roadWeights, lanes, visited, hasLink, cities, new RandomCityGenerator(cities), new HashSet<>());
         leader.add(cityList.get(city));
 
 
         for(int i = 0; i < cities; i++) {
-            for(int j = 0; j < roadWeights[i].length; j++) {
+            for(int j = 0; j < roadWeights[0].length; j++) {
                 int weight = roadWeights[i][j];
                 if(weight != 0) {
                     roads.add(new Road(cityList.get(i), cityList.get(j), LaneType.getLane(weight)));
@@ -147,10 +154,11 @@ public class MapGenerator {
         int cities,
         RandomCityGenerator random,
         Set<Integer> travelled
-        ) {
+    ) {
 
         if(travelled.size() == cities - 1 && lanes == 0) {
             Arrays.stream(roadWeights).map(Arrays::toString).forEach(System.out::println);
+            hasLink.forEach(System.out::println);
             System.out.println(travelled.size());
             return true;
         }
@@ -169,6 +177,9 @@ public class MapGenerator {
             for(int randomNextWeight : connectionPossibleAndReturnRandom(city, neighbour, hasLink)) {
                 currWeights.add(randomNextWeight);
                 hasLink.get(neighbour).add(randomNextWeight);
+                if(currWeights.size() > 2 || hasLink.get(neighbour).size() > 2) {
+                    return false;
+                }
                 linkEstablished[city][neighbour] = true;
                 linkEstablished[neighbour][city] = true;
                 roadWeights[city][neighbour] = randomNextWeight;
@@ -204,6 +215,10 @@ public class MapGenerator {
         Set<Integer> neighbourLinks = hasLink.get(neighbour);
         Set<Integer> currLinks = hasLink.get(mine);
 
+        if(currLinks.isEmpty() && neighbourLinks.isEmpty()) {
+            return Set.of(1, 2, 3);
+        }
+
         if (neighbourLinks.isEmpty() && currLinks.size() == 1) {
             int num = currLinks.iterator().next();
             switch (num) {
@@ -229,6 +244,7 @@ public class MapGenerator {
         if (currLinks.equals(neighbourLinks)) {
             return new HashSet<>(currLinks);
         }
+
 
         Set<Integer> filteredCurrLinks = currLinks.stream().filter(n -> n != 0 && n != 4).collect(Collectors.toSet());
         Set<Integer> filteredNeighbourLinks = neighbourLinks.stream().filter(n -> n != 0 && n != 4).collect(Collectors.toSet());
