@@ -5,4 +5,5 @@
 e.g national highways = 4, make 5 connected components then connect them together
 - Multiple retries are made to generate the graph.
 ![image description](demo/sample_image.png)
-# 50 cities, 115 lanes, 4 NH
+![image description](demo/sample_image2.png)
+
