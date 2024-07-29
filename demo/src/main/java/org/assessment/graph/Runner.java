@@ -3,6 +3,8 @@ import java.util.concurrent.ExecutionException;
 import org.assessment.graph.pojos.Road;
 import org.assessment.graph.service.GenerateGraph;
 import org.assessment.graph.service.MapGenerator;
+import org.graphstream.algorithm.ConnectedComponents;
+import org.graphstream.algorithm.TarjanStronglyConnectedComponents;
 import org.graphstream.graph.*;
 import org.graphstream.graph.implementations.MultiGraph;
 import org.graphstream.ui.view.Viewer;
@@ -26,9 +28,9 @@ public class Runner {
      */
     public static void main(String[] args) throws ExecutionException, InterruptedException {
 
-        MapGenerator generator = new MapGenerator(100, 200, 3);
+        MapGenerator generator = new MapGenerator(50, 80, 4);
         generator.generateGraph();
-        System.out.println(generator.getRoads().stream().map(Road::toString).filter(r -> r.contains("NATIONAL")).count());
+        System.out.println("hello");
 
         System.setProperty("org.graphstream.ui", "swing");
 
