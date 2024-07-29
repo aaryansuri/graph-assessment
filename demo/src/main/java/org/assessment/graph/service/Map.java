@@ -12,7 +12,7 @@ public class Map {
 
     public void generateRandomCities(int num) {
         cities = new ArrayList<>();
-        IntStream.range(0, num + 1).forEach(i -> {
+        IntStream.range(0, num).forEach(i -> {
             String name = RandomUtil.getCity();
             double latitude = RandomUtil.getLatitude();
             double longitude = RandomUtil.getLongitude();
