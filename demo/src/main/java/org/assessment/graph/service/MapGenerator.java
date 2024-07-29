@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -99,7 +100,7 @@ public class MapGenerator {
             Future<?> future = executor.submit(() -> start(city, cities, lanes, cityList, alone));
 
             try {
-                future.get(1, TimeUnit.SECONDS);
+                future.get(5, TimeUnit.SECONDS);
                 return;
             } catch (TimeoutException e) {
                 System.out.println("DFS Attempt " + (attempt + 1) + " timed out. Retrying...");
@@ -127,9 +128,13 @@ public class MapGenerator {
         }
 
 
-        dfs(city, 0, linkEstablished, roadWeights, lanes, visited, hasLink, cities, new RandomCityGenerator(cities), new HashSet<>());
+        Set<Integer> travelled = new HashSet<>();
+        travelled.add(city);
+        dfs(city, 0, linkEstablished, roadWeights, lanes, visited, hasLink, cities, new RandomCityGenerator(cities), travelled);
         leader.add(cityList.get(city));
-
+        if(checkInvalidMove(roadWeights)) {
+            System.out.println("invalid graph");
+        }
 
         for(int i = 0; i < cities; i++) {
             for(int j = 0; j < roadWeights[0].length; j++) {
@@ -156,12 +161,15 @@ public class MapGenerator {
         Set<Integer> travelled
     ) {
 
+        if(checkInvalidMove(roadWeights)) return false;
         if(travelled.size() == cities - 1 && lanes == 0) {
             Arrays.stream(roadWeights).map(Arrays::toString).forEach(System.out::println);
             hasLink.forEach(System.out::println);
             System.out.println(travelled.size());
+            System.out.println(city);
             return true;
         }
+
         if(lanes <= 0) return false;
         if(lanes < cities - curr - 1) return false;
         if(curr == cities - 1) {
@@ -177,9 +185,6 @@ public class MapGenerator {
             for(int randomNextWeight : connectionPossibleAndReturnRandom(city, neighbour, hasLink)) {
                 currWeights.add(randomNextWeight);
                 hasLink.get(neighbour).add(randomNextWeight);
-                if(currWeights.size() > 2 || hasLink.get(neighbour).size() > 2) {
-                    return false;
-                }
                 linkEstablished[city][neighbour] = true;
                 linkEstablished[neighbour][city] = true;
                 roadWeights[city][neighbour] = randomNextWeight;
@@ -229,7 +234,7 @@ public class MapGenerator {
                 case 1:
                     return Set.of(1, 2);
                 case 2:
-                    return Set.of(1, 2, 3);
+                    return Set.of(3, 2, 1);
             }
         }
 
@@ -250,6 +255,30 @@ public class MapGenerator {
         Set<Integer> filteredNeighbourLinks = neighbourLinks.stream().filter(n -> n != 0 && n != 4).collect(Collectors.toSet());
 
         return filteredCurrLinks.size() >= filteredNeighbourLinks.size() ? filteredCurrLinks : filteredNeighbourLinks;
+    }
+
+    private static boolean checkInvalidMove(int[][] array) {
+        for (int[] row : array) {
+            // Filter out zeros
+            int[] nonZeroElements = Arrays.stream(row)
+                .filter(value -> value != 0)
+                .toArray();
+
+            // If the row has only one or no non-zero elements, skip it
+            if (nonZeroElements.length <= 1) {
+                continue;
+            }
+
+            // Find min and max of the filtered row
+            OptionalInt min = Arrays.stream(nonZeroElements).min();
+            OptionalInt max = Arrays.stream(nonZeroElements).max();
+
+            // Check if the difference is greater than 1
+            if (min.isPresent() && max.isPresent() && (max.getAsInt() - min.getAsInt() > 1)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
