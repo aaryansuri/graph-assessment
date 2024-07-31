@@ -20,7 +20,7 @@ public class Runner {
      * 2 lanes: Highways
      * 1 lane: Main Roads"
      * MapGenerator uses backtrack internally and multiple tries are made till a graph is not generated
-     * wait atleast 1 minute
+     * wait for few minutes
      * if fails then re-run the program again
      * @param args
      * @throws ExecutionException
@@ -28,7 +28,7 @@ public class Runner {
      */
     public static void main(String[] args) throws ExecutionException, InterruptedException {
 
-        MapGenerator generator = new MapGenerator(50, 80, 4);
+        MapGenerator generator = new MapGenerator(100, 200, 4);
         generator.generateGraph();
         System.out.println("hello");
 
@@ -40,6 +40,15 @@ public class Runner {
         generateGraph.addCities(generator.getCityList(), graph);
         generateGraph.addRoads(generator.getRoads(), graph);
         generateGraph.addAttributes(graph);
+
+        ConnectedComponents cc = new ConnectedComponents();
+        cc.init(graph);
+        TarjanStronglyConnectedComponents tscc = new TarjanStronglyConnectedComponents();
+        tscc.init(graph);
+        tscc.compute();
+
+        System.out.printf("%d connected component(s) in this graph, so far.%n",
+            cc.getConnectedComponentsCount());
 
         Viewer viewer = graph.display();
         viewer.enableAutoLayout();
