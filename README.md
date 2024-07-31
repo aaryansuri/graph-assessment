@@ -5,9 +5,9 @@
 e.g national highways = 4, make 5 connected components then connect them together
 - Multiple retries are made to generate the graph.
 
-#DpBitMask
+- Backtracking with DpBitMask
 ![image description](demo/dp_bitmask_netwok.png)
 
-#Backtracking
+- Backtracking ( has some bugs )
 ![image description](demo/sample_image2.png)
 
