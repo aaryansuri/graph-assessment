@@ -127,7 +127,7 @@ public class MapGenerator {
         System.out.println(cities);
 //        visited[0] = true;
         if(!alone) {
-            roadWeights[city][city] = 4;
+            roadWeights[0][0] = 4;
         }
 
 
@@ -139,7 +139,7 @@ public class MapGenerator {
         leader.add(cityList.get(0));
 
         if(!alone) {
-            roadWeights[city][city] = 0;
+            roadWeights[0][0] = 0;
         }
 
         System.out.println("CC created " + city);
@@ -156,7 +156,7 @@ public class MapGenerator {
 
     }
 
-    private boolean dfsDP(
+    private boolean dfs(
         int city,
         int curr,
         boolean[][] linkEstablished,
