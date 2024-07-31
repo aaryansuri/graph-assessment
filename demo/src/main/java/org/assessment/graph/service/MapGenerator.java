@@ -246,7 +246,7 @@ public class MapGenerator {
 
         for(int neighbour = 0; neighbour < cities; neighbour++) {
             if(neighbour == city) continue;
-            // 1. travel neighbor if travelled or not
+            // 1. Travel neighbor if no link or if neighbour has not been covered yet in the map
             if((mask & (1 << neighbour)) == 0 || roadWeights[city][neighbour] == 0) {
                 for(int conn : possibleConnection(city, neighbour, roadWeights)) {
                     roadWeights[city][neighbour] = conn;
