@@ -201,9 +201,9 @@ public class MapGenerator {
                 visited[city] = true;
                 travelled.add(city);
                 if(visited[neighbour]) {
-                    cooked = dfsDP(neighbour, curr, linkEstablished, roadWeights, lanes - randomNextWeight, visited, hasLink, cities, random, travelled);
+                    cooked = dfs(neighbour, curr, linkEstablished, roadWeights, lanes - randomNextWeight, visited, hasLink, cities, random, travelled);
                 } else {
-                    cooked = dfsDP(neighbour, curr + 1, linkEstablished, roadWeights, lanes - randomNextWeight, visited, hasLink, cities, random, travelled);
+                    cooked = dfs(neighbour, curr + 1, linkEstablished, roadWeights, lanes - randomNextWeight, visited, hasLink, cities, random, travelled);
                 }
                 if(cooked) {
                     return true;
